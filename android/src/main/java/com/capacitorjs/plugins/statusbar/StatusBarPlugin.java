@@ -86,7 +86,7 @@ public class StatusBarPlugin extends Plugin {
                 () -> {
                     try {
                         final int parsedColor = WebColor.parseColor(color.toUpperCase(Locale.ROOT));
-                        implementation.setBackgroundColor(parsedColor);
+                        implementation.setBackgroundColor(getActivity(), parsedColor);
                         call.resolve();
                     } catch (IllegalArgumentException ex) {
                         call.reject("Invalid color provided. Must be a hex string (ex: #ff0000");

@@ -29,7 +29,7 @@ public class StatusBar {
         this.activity = activity;
         this.currentStatusBarColor = activity.getWindow().getStatusBarColor();
         this.listener = listener;
-        setBackgroundColor(config.getBackgroundColor());
+        setBackgroundColor(activity, config.getBackgroundColor());
         setStyle(config.getStyle());
         setOverlaysWebView(config.isOverlaysWebView());
         StatusBarInfo info = getInfo();
@@ -61,14 +61,21 @@ public class StatusBar {
         setStyle(this.currentStyle);
     }
 
-    @SuppressWarnings("deprecation")
-    public void setBackgroundColor(int color) {
+    public void setBackgroundColor(Activity activity, int color) {
+        if (activity == null) return;
+
         Window window = activity.getWindow();
-        window.clearFlags(WindowManager.LayoutParams.FLAG_TRANSLUCENT_STATUS);
-        window.addFlags(WindowManager.LayoutParams.FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS);
-        window.setStatusBarColor(color);
-        // update the local color field as well
-        currentStatusBarColor = color;
+
+        if (Build.VERSION.SDK_INT >= 35) { // Android 15+
+            window.getDecorView().setOnApplyWindowInsetsListener((view, insets) -> {
+                Insets statusBarInsets = insets.getInsets(WindowInsets.Type.statusBars());
+                view.setBackgroundColor(color);
+                view.setPadding(0, statusBarInsets.top, 0, 0);
+                return insets;
+            });
+        } else {
+            window.setStatusBarColor(color);
+        }
     }
 
     public void hide() {
